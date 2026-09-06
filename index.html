@@ -1,149 +1,133 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.4">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Reception Clock</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", sans-serif;
+    }
+    /* 背景動画コンテナ */
+    #player-wrapper {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* タッチ無効化 */
+      overflow: hidden;
+    }
+    #player {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vw;
+      height: 56.25vw; /* 16:9比率維持 */
+      min-height: 100vh;
+      min-width: 177.77vh;
+      transform: translate(-50%, -50%);
+    }
+    /* 時計オーバーレイ */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end; /* 下部配置（中央にしたい場合は center） */
+      align-items: flex-start;  /* 左下配置（右下にしたい場合は flex-end） */
+      padding: 4vw;
+      color: #fff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); /* 明るい映像でも文字を視認可能に */
+      pointer-events: none;
+    }
+    .date {
+      font-size: 1.8vw;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      opacity: 0.9;
+    }
+    .time {
+      font-size: 6.5vw;
+      font-weight: 200;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
   </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="ja"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;Reception Clock&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>user-select: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>body, html {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>background-color: #000;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* 背景動画コンテナ */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#player-wrapper {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>pointer-events: none; /* タッチ無効化 */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>overflow: hidden;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>#player {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>top: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>left: 50%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100vw;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 56.25vw; /* 16:9比率維持 */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>min-width: 177.77vh;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>transform: translate(-50%, -50%);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>/* 時計オーバーレイ */</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.overlay {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>position: absolute;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>height: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>flex-direction: column;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>justify-content: flex-end; /* 下部配置（中央にしたい場合は center） */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>align-items: flex-start;<span class="Apple-converted-space">  </span>/* 左下配置（右下にしたい場合は flex-end） */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>padding: 4vw;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>color: #fff;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); /* 明るい映像でも文字を視認可能に */</p>
-<p class="p1"><span class="Apple-converted-space">      </span>pointer-events: none;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.date {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 1.8vw;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 300;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>letter-spacing: 0.05em;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>opacity: 0.9;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>.time {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-size: 6.5vw;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>font-weight: 200;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>letter-spacing: -0.02em;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>line-height: 1.1;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div id="player-wrapper"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="player"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="overlay"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="date" id="date-display"&gt;--月--日 ---&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="time" id="time-display"&gt;00:00&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>// 1. YouTube 動画のIDを指定（URLの "v=" の後ろの英数字）</p>
-<p class="p1"><span class="Apple-converted-space">    </span>// 例: https://www.youtube.com/watch?v=dQw4w9WgXcQ なら "dQw4w9WgXcQ"</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const YOUTUBE_VIDEO_ID = '-2o45BFOddQ&amp;t=1988s'; // ※4K自然風景の例</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// 2. YouTube IFrame APIの読み込み</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const tag = document.createElement('script');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>tag.src = "https://www.youtube.com/iframe_api";</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const firstScriptTag = document.getElementsByTagName('script')[0];</p>
-<p class="p1"><span class="Apple-converted-space">    </span>firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>let player;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>function onYouTubeIframeAPIReady() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>player = new YT.Player('player', {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>videoId: YOUTUBE_VIDEO_ID,</p>
-<p class="p1"><span class="Apple-converted-space">        </span>playerVars: {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>autoplay: 1,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>controls: 0,<span class="Apple-converted-space">        </span>// シークバーや設定ボタンを非表示</p>
-<p class="p1"><span class="Apple-converted-space">          </span>showinfo: 0,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>modestbranding: 1,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>loop: 1,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>playlist: YOUTUBE_VIDEO_ID, // ループ再生に必須</p>
-<p class="p1"><span class="Apple-converted-space">          </span>fs: 0,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>cc_load_policy: 0,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>iv_load_policy: 3,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>autohide: 1,</p>
-<p class="p1"><span class="Apple-converted-space">          </span>mute: 1 <span class="Apple-converted-space">            </span>// 自動再生のためにミュート必須</p>
-<p class="p1"><span class="Apple-converted-space">        </span>},</p>
-<p class="p1"><span class="Apple-converted-space">        </span>events: {</p>
-<p class="p1"><span class="Apple-converted-space">          </span>onReady: (e) =&gt; e.target.playVideo()</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">      </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// 3. 時計の更新処理</p>
-<p class="p1"><span class="Apple-converted-space">    </span>function updateClock() {</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const now = new Date();</p>
-<p class="p2"><span class="Apple-converted-space">      </span></p>
-<p class="p1"><span class="Apple-converted-space">      </span>// 日付フォーマット (例: 10月24日 金曜日)</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const options = { month: 'numeric', day: 'numeric', weekday: 'short' };</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('date-display').textContent = now.toLocaleDateString('ja-JP', options);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>// 時刻フォーマット (例: 14:05)</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const hours = String(now.getHours()).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>const minutes = String(now.getMinutes()).padStart(2, '0');</p>
-<p class="p1"><span class="Apple-converted-space">      </span>document.getElementById('time-display').textContent = `${hours}:${minutes}`;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>setInterval(updateClock, 1000);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>updateClock();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+
+  <div id="player-wrapper">
+    <div id="player"></div>
+  </div>
+
+  <div class="overlay">
+    <div class="date" id="date-display">--月--日 ---</div>
+    <div class="time" id="time-display">00:00</div>
+  </div>
+
+  <script>
+    // 1. YouTube 動画のIDを指定（URLの "v=" の後ろの英数字）
+    // 例: https://www.youtube.com/watch?v=dQw4w9WgXcQ なら "dQw4w9WgXcQ"
+    const YOUTUBE_VIDEO_ID = '-2o45BFOddQ&t=1988s'; // ※4K自然風景の例
+
+    // 2. YouTube IFrame APIの読み込み
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        videoId: YOUTUBE_VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          controls: 0,        // シークバーや設定ボタンを非表示
+          showinfo: 0,
+          modestbranding: 1,
+          loop: 1,
+          playlist: YOUTUBE_VIDEO_ID, // ループ再生に必須
+          fs: 0,
+          cc_load_policy: 0,
+          iv_load_policy: 3,
+          autohide: 1,
+          mute: 1             // 自動再生のためにミュート必須
+        },
+        events: {
+          onReady: (e) => e.target.playVideo()
+        }
+      });
+    }
+
+    // 3. 時計の更新処理
+    function updateClock() {
+      const now = new Date();
+      
+      // 日付フォーマット (例: 10月24日 金曜日)
+      const options = { month: 'numeric', day: 'numeric', weekday: 'short' };
+      document.getElementById('date-display').textContent = now.toLocaleDateString('ja-JP', options);
+
+      // 時刻フォーマット (例: 14:05)
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('time-display').textContent = `${hours}:${minutes}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+  </script>
 </body>
 </html>
