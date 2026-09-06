@@ -4,12 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Reception Clock</title>
+
+  <!-- 全画面（スタンドアロン表示）設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reception">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
+
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      user-select: none; 
+      user-select: none;
     }
     body, html {
       width: 100%;
@@ -18,14 +26,13 @@
       background-color: #000;
       font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Sans", sans-serif;
     }
-    /* 背景動画コンテナ */
     #player-wrapper {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none; /* タッチ無効化 */
+      pointer-events: none;
       overflow: hidden;
     }
     #player {
@@ -33,12 +40,11 @@
       top: 50%;
       left: 50%;
       width: 100vw;
-      height: 56.25vw; /* 16:9比率維持 */
+      height: 56.25vw;
       min-height: 100vh;
       min-width: 177.77vh;
       transform: translate(-50%, -50%);
     }
-    /* 時計オーバーレイ */
     .overlay {
       position: absolute;
       top: 0;
@@ -47,36 +53,27 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end; /* 下部配置（中央にしたい場合は center） */
-      align-items: flex-start;  /* 左下配置（右下にしたい場合は flex-end） */
+      justify-content: flex-end;
+      align-items: flex-start;
       padding: 4vw;
       color: #fff;
-      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); /* 明るい映像でも文字を視認可能に */
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
       pointer-events: none;
+      z-index: 10;
     }
     .date {
-      font-size: 1.8vw;
+      font-size: 2vw;
       font-weight: 300;
       letter-spacing: 0.05em;
       opacity: 0.9;
     }
     .time {
-      font-size: 6.5vw;
+      font-size: 7vw;
       font-weight: 200;
       letter-spacing: -0.02em;
       line-height: 1.1;
     }
   </style>
-
- <!-- 全画面（スタンドアロン表示）のための設定 -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Reception">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <!-- iPadOSにアプリとして認識させるマニフェスト設定 -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
-  
 </head>
 <body>
 
@@ -90,11 +87,10 @@
   </div>
 
   <script>
-    // 1. YouTube 動画のIDを指定（URLの "v=" の後ろの英数字）
-    // 例: https://www.youtube.com/watch?v=dQw4w9WgXcQ なら "dQw4w9WgXcQ"
-    const YOUTUBE_VIDEO_ID = 'DeSiSg2e1MY'; // ※4K自然風景の例
+    // 流したいYouTube動画のID
+    const YOUTUBE_VIDEO_ID = 'jfKfPfyJRdk'; 
 
-    // 2. YouTube IFrame APIの読み込み
+    // YouTube API 読み込み
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -106,32 +102,49 @@
         videoId: YOUTUBE_VIDEO_ID,
         playerVars: {
           autoplay: 1,
-          controls: 0,        // シークバーや設定ボタンを非表示
+          controls: 0,
           showinfo: 0,
           modestbranding: 1,
           loop: 1,
-          playlist: YOUTUBE_VIDEO_ID, // ループ再生に必須
-          fs: 0,
-          cc_load_policy: 0,
-          iv_load_policy: 3,
-          autohide: 1,
-          mute: 1             // 自動再生のためにミュート必須
+          playlist: YOUTUBE_VIDEO_ID,
+          mute: 1,
+          playsinline: 1,
+          enablejsapi: 1,
+          origin: window.location.origin
         },
         events: {
-          onReady: (e) => e.target.playVideo()
+          onReady: function(e) {
+            e.target.mute();
+            // 1. 準備完了時に1080pを指定
+            e.target.setPlaybackQuality('hd1080');
+            e.target.playVideo();
+          },
+          onStateChange: function(e) {
+            // 2. 再生開始時にも改めて1080pを固定指定
+            if (e.data === YT.PlayerState.PLAYING) {
+              e.target.setPlaybackQuality('hd1080');
+            }
+          },
+          onError: function(e) {
+            console.error("YouTube Player Error Code:", e.data);
+          }
         }
       });
     }
 
-    // 3. 時計の更新処理
+    // 自動再生ブロック対策（初回タップで再生）
+    window.addEventListener('touchstart', function() {
+      if (player && typeof player.playVideo === 'function') {
+        player.playVideo();
+      }
+    }, { once: true });
+
+    // 時計の更新
     function updateClock() {
       const now = new Date();
-      
-      // 日付フォーマット (例: 10月24日 金曜日)
       const options = { month: 'numeric', day: 'numeric', weekday: 'short' };
       document.getElementById('date-display').textContent = now.toLocaleDateString('ja-JP', options);
 
-      // 時刻フォーマット (例: 14:05)
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       document.getElementById('time-display').textContent = `${hours}:${minutes}`;
