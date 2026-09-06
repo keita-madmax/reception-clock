@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Reception Clock</title>
 
-  <!-- 全画面（スタンドアロン表示）設定 -->
+  <!-- 全画面設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Reception">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background-color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
 
   <style>
     * {
@@ -87,10 +87,8 @@
   </div>
 
   <script>
-    // 流したいYouTube動画のID
     const YOUTUBE_VIDEO_ID = 'jfKfPfyJRdk'; 
 
-    // YouTube API 読み込み
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -109,21 +107,12 @@
           playlist: YOUTUBE_VIDEO_ID,
           mute: 1,
           playsinline: 1,
-          enablejsapi: 1,
-          origin: window.location.origin
+          enablejsapi: 1
         },
         events: {
           onReady: function(e) {
             e.target.mute();
-            // 1. 準備完了時に1080pを指定
-            e.target.setPlaybackQuality('hd1080');
             e.target.playVideo();
-          },
-          onStateChange: function(e) {
-            // 2. 再生開始時にも改めて1080pを固定指定
-            if (e.data === YT.PlayerState.PLAYING) {
-              e.target.setPlaybackQuality('hd1080');
-            }
           },
           onError: function(e) {
             console.error("YouTube Player Error Code:", e.data);
@@ -132,14 +121,14 @@
       });
     }
 
-    // 自動再生ブロック対策（初回タップで再生）
+    // 初回タップ時の再生保護
     window.addEventListener('touchstart', function() {
       if (player && typeof player.playVideo === 'function') {
         player.playVideo();
       }
     }, { once: true });
 
-    // 時計の更新
+    // 時計の更新処理
     function updateClock() {
       const now = new Date();
       const options = { month: 'numeric', day: 'numeric', weekday: 'short' };
