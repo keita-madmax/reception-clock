@@ -4,14 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Reception Clock</title>
-
-  <!-- 全画面設定 -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Reception">
-  <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background-color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
-
   <style>
     * {
       margin: 0;
@@ -74,6 +66,15 @@
       line-height: 1.1;
     }
   </style>
+
+  <!-- 全画面（スタンドアロン表示）のための設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reception">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- iPadOSにアプリとして認識させるマニフェスト設定 -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
 </head>
 <body>
 
@@ -87,6 +88,8 @@
   </div>
 
   <script>
+    // 確実に埋め込み再生できる動画IDに変更（ロフィ風の環境アニメーション風景）
+    // 別の風景にしたい場合はここのIDを書き換えてください
     const YOUTUBE_VIDEO_ID = 'jfKfPfyJRdk'; 
 
     const tag = document.createElement('script');
@@ -106,12 +109,13 @@
           loop: 1,
           playlist: YOUTUBE_VIDEO_ID,
           mute: 1,
-          playsinline: 1,
-          enablejsapi: 1
+          playsinline: 1,       // iOSでの全画面強制解除を防ぐ必須設定
+          enablejsapi: 1,
+          origin: window.location.origin
         },
         events: {
           onReady: function(e) {
-            e.target.mute();
+            e.target.mute();    // iOS制限対策：明示的にミュート
             e.target.playVideo();
           },
           onError: function(e) {
@@ -121,14 +125,14 @@
       });
     }
 
-    // 初回タップ時の再生保護
+    // ブラウザの自動再生ブロック対策：画面タップで再生キック
     window.addEventListener('touchstart', function() {
       if (player && typeof player.playVideo === 'function') {
         player.playVideo();
       }
     }, { once: true });
 
-    // 時計の更新処理
+    // 時計の更新
     function updateClock() {
       const now = new Date();
       const options = { month: 'numeric', day: 'numeric', weekday: 'short' };
