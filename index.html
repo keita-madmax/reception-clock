@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Reception Clock</title>
+
+  <!-- 全画面設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Reception">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background-color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
+
   <style>
     * {
       margin: 0;
@@ -65,16 +73,25 @@
       letter-spacing: -0.02em;
       line-height: 1.1;
     }
+    /* 音声案内（タップを促す控えめな表示） */
+    .sound-hint {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 14px;
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      transition: opacity 0.5s ease;
+      z-index: 20;
+    }
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
-
-  <!-- 全画面（スタンドアロン表示）のための設定 -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Reception">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <!-- iPadOSにアプリとして認識させるマニフェスト設定 -->
-  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
 </head>
 <body>
 
@@ -82,15 +99,17 @@
     <div id="player"></div>
   </div>
 
+  <!-- 初回タップ前だけ右上に表示される案内 -->
+  <div class="sound-hint" id="sound-hint">画面タップで音声ON</div>
+
   <div class="overlay">
     <div class="date" id="date-display">--月--日 ---</div>
     <div class="time" id="time-display">00:00</div>
   </div>
 
   <script>
-    // 確実に埋め込み再生できる動画IDに変更（ロフィ風の環境アニメーション風景）
-    // 別の風景にしたい場合はここのIDを書き換えてください
-    const YOUTUBE_VIDEO_ID = 'jfKfPfyJRdk'; 
+    const YOUTUBE_VIDEO_ID = 'DeSiSg2e1MY&t=6575s'; 
+    const DEFAULT_VOLUME = 30; // 音量 (0〜100) ※オフィスの環境に合わせて調整してください
 
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
@@ -108,14 +127,13 @@
           modestbranding: 1,
           loop: 1,
           playlist: YOUTUBE_VIDEO_ID,
-          mute: 1,
-          playsinline: 1,       // iOSでの全画面強制解除を防ぐ必須設定
-          enablejsapi: 1,
-          origin: window.location.origin
+          mute: 1, // 自動再生を通すために必須
+          playsinline: 1,
+          enablejsapi: 1
         },
         events: {
           onReady: function(e) {
-            e.target.mute();    // iOS制限対策：明示的にミュート
+            e.target.mute();
             e.target.playVideo();
           },
           onError: function(e) {
@@ -125,14 +143,25 @@
       });
     }
 
-    // ブラウザの自動再生ブロック対策：画面タップで再生キック
-    window.addEventListener('touchstart', function() {
-      if (player && typeof player.playVideo === 'function') {
+    // 画面を1回タップした時にミュートを解除し、音声を流す
+    function enableAudio() {
+      if (player && typeof player.unMute === 'function') {
+        player.unMute();
+        player.setVolume(DEFAULT_VOLUME);
         player.playVideo();
-      }
-    }, { once: true });
 
-    // 時計の更新
+        // 案内表示を非表示にする
+        const hint = document.getElementById('sound-hint');
+        if (hint) {
+          hint.classList.add('hidden');
+        }
+      }
+    }
+
+    window.addEventListener('touchstart', enableAudio, { once: true });
+    window.addEventListener('click', enableAudio, { once: true });
+
+    // 時計の更新処理
     function updateClock() {
       const now = new Date();
       const options = { month: 'numeric', day: 'numeric', weekday: 'short' };
