@@ -68,10 +68,14 @@
     }
   </style>
 
-  <!-- 全画面表示（バーを消す）設定 -->
+ <!-- 全画面（スタンドアロン表示）のための設定 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Reception">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- iPadOSにアプリとして認識させるマニフェスト設定 -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Reception%22%2C%22short_name%22%3A%22Reception%22%2C%22display%22%3A%22fullscreen%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%7D">
   
 </head>
 <body>
